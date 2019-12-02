@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS users (
+    id          INT NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(40) NOT NULL,
+    is_active   BOOLEAN NOT NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    PRIMARY KEY (id),
+) ENGINE=INNODB;
