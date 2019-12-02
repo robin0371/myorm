@@ -1,0 +1,33 @@
+version: '3.3'
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: myorm_user
+      POSTGRES_PASSWORD: myorm_user
+      POSTGRES_DB: myorm_db
+    ports:
+      - '54320:5432'
+    expose:
+      - '54320'
+    volumes:
+      - ./scripts/postgres.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./db/postgres:/var/lib/postgresql/data
+
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: myorm_db
+      MYSQL_USER: myorm_user
+      MYSQL_PASSWORD: myorm_user
+      MYSQL_ROOT_PASSWORD: myorm_user
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - ./scripts/mysql.sql:/data/application/init.sql
+      - ./db/mysql:/var/lib/mysql
