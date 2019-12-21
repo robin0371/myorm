@@ -1,11 +1,15 @@
+import datetime
+
 import psycopg2
 import pytest
 
 from myorm.backend.postgresql import make_connection
 
 
-class TestMakeConnection:
+DB = "postgres"
 
+
+class TestMakeConnection:
     @pytest.mark.parametrize(
         "params,expectation",
         [
@@ -21,3 +25,22 @@ class TestMakeConnection:
         connection = make_connection(postgres_db_params)
         assert connection.status == psycopg2.extensions.STATUS_READY
         connection.close()
+
+
+class TestCreate:
+    def test_ok(self, user_model):
+        user = user_model(
+            name="John Doe", is_active=True, created_at=datetime.date.today()
+        )
+
+        user.objects.using(DB).save()
+
+        assert user.id
+
+    def test_incorrect_db(self, user_model):
+        user = user_model(
+            name="John Doe", is_active=True, created_at=datetime.date.today()
+        )
+
+        with pytest.raises(KeyError):
+            user.objects.using("not_existed").save()

@@ -1,8 +1,10 @@
+"""myorm sqlite operations module."""
 import os
 import sqlite3
 
 
 def make_connection(params):
+    """Return connection to SQLite database."""
     db = params.get("db")
 
     if not db:

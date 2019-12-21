@@ -3,11 +3,23 @@ import os
 import pytest
 
 
-def get_project_root():
-    return os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
+from myorm import Model, BooleanField, CharField, DateTimeField, IntegerField
+from myorm.util import get_project_root
 
 
-@pytest.fixture(scope='session')
+class User(Model):
+    id = IntegerField()
+    name = CharField()
+    is_active = BooleanField()
+    created_at = DateTimeField()
+
+
+@pytest.fixture(scope="session")
+def user_model():
+    return User
+
+
+@pytest.fixture(scope="session")
 def postgres_db_params():
     test_db_params = {
         "host": "localhost",
@@ -19,7 +31,7 @@ def postgres_db_params():
     return test_db_params
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def mysql_db_params():
     test_db_params = {
         "host": "localhost",
@@ -30,7 +42,7 @@ def mysql_db_params():
     return test_db_params
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def sqlite_db_params():
     test_db_params = {
         "db": os.path.join(get_project_root(), "db", "sqlite.db"),

@@ -6,7 +6,6 @@ from myorm.backend.sqlite import make_connection
 
 
 class TestMakeConnection:
-
     @pytest.mark.parametrize(
         "params,expectation",
         [

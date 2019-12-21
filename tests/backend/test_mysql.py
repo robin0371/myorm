@@ -5,7 +5,6 @@ from myorm.backend.mysql import make_connection
 
 
 class TestMakeConnection:
-
     @pytest.mark.parametrize(
         "params,expectation",
         [
