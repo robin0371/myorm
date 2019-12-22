@@ -29,16 +29,6 @@ class Operations(BaseOperations):
     def make_connection(self):
         self.connection = make_connection(self.params)
 
-    def get_query(self, op_type, **kwargs):
-        operation = getattr(self, op_type)
-        query = operation.get_query(**kwargs)
-        return query
-
-    def execute(self, op_type, **kwargs):
-        operation = getattr(self, op_type)
-        result = operation.execute(**kwargs)
-        return result
-
 
 class CreateOperation(BaseCreateOperations):
     """Create operation for PostgreSQL database."""

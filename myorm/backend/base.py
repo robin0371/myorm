@@ -23,9 +23,19 @@ class Operations(BaseOperation):
 
         self.make_connection()
 
+    def get_query(self, op_type, **kwargs):
+        operation = getattr(self, op_type)
+        query = operation.get_query(**kwargs)
+        return query
+
+    def execute(self, op_type, **kwargs):
+        operation = getattr(self, op_type)
+        result = operation.execute(**kwargs)
+        return result
+
     @abc.abstractmethod
     def make_connection(self):
-        """Return new connection."""
+        """Make connection to database."""
 
 
 class BaseCreateOperations(BaseOperation):
