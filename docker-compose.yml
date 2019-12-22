@@ -19,6 +19,7 @@ services:
   mysql:
     image: mysql:5.7
     restart: always
+    command: --init-file /data/application/init.sql
     environment:
       MYSQL_DATABASE: myorm_db
       MYSQL_USER: myorm_user

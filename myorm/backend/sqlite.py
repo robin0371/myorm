@@ -61,4 +61,3 @@ class CreateOperation(BaseCreateOperations):
         query = self.insert()
         s = ("?, " * len(columns))[:-2]
         return f"{query} {table}({', '.join(columns)}) VALUES ({s})"
-

@@ -1,7 +1,9 @@
-CREATE TABLE IF NOT EXISTS users (
-    id          INT NOT NULL AUTO_INCREMENT,
-    name        VARCHAR(40) NOT NULL,
-    is_active   BOOLEAN NOT NULL,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    PRIMARY KEY (id),
-) ENGINE=INNODB;
+USE myorm_db;
+CREATE TABLE `users` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(40) COLLATE utf8_bin NOT NULL,
+    `is_active` BOOLEAN NOT NULL,
+    `created_at` DATE NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin
+AUTO_INCREMENT=1;
