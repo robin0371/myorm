@@ -30,12 +30,12 @@ class BaseModel:
         return pluralize(self.__class__.__name__).lower()
 
     @property
-    def id(self):
+    def pk(self):
         id_field = getattr(self, "id")
         return id_field.value
 
-    @id.setter
-    def id(self, object_id):
+    @pk.setter
+    def pk(self, object_id):
         id_field = getattr(self, "id")
         id_field.value = object_id
 
@@ -58,7 +58,7 @@ class BaseModel:
 
     def save(self):
         """Save instance."""
-        if self.id is None:
+        if self.pk is None:
             self.objects.create(self)
 
     def all(self):

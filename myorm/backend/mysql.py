@@ -65,8 +65,6 @@ class ReadOperation(BaseReadOperations):
             with self.connection.cursor() as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
-
-            self.connection.commit()
         except pymysql.DatabaseError as error:
             LOGGER.error(error)
         else:
