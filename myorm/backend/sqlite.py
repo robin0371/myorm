@@ -31,11 +31,10 @@ class Operations(BaseOperations):
     """Object with set of operations for MySQL database."""
 
     def __init__(self, params):
-        super(Operations, self).__init__(params)
-        self.create = CreateOperation(self.connection)
+        self.connection = make_connection(params)
 
-    def make_connection(self):
-        self.connection = make_connection(self.params)
+        # Operations
+        self.create = CreateOperation(self.connection)
 
 
 class CreateOperation(BaseCreateOperations):

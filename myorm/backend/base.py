@@ -17,12 +17,6 @@ class BaseOperation:
 class Operations(BaseOperation):
     """Database operations."""
 
-    def __init__(self, params):
-        self.params = params
-        self.connection = None
-
-        self.make_connection()
-
     def get_query(self, op_type, **kwargs):
         operation = getattr(self, op_type)
         query = operation.get_query(**kwargs)
@@ -33,10 +27,6 @@ class Operations(BaseOperation):
         result = operation.execute(**kwargs)
         return result
 
-    @abc.abstractmethod
-    def make_connection(self):
-        """Make connection to database."""
-
 
 class BaseCreateOperations(BaseOperation):
     """Base create operations."""
@@ -45,3 +35,12 @@ class BaseCreateOperations(BaseOperation):
     def insert():
         """Insert query."""
         return "INSERT INTO"
+
+
+class BaseReadOperations(BaseOperation):
+    """Base read operations."""
+
+    @staticmethod
+    def select():
+        """Select query."""
+        return "SELECT"

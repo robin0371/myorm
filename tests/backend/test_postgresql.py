@@ -44,3 +44,16 @@ class TestCreate:
 
         with pytest.raises(KeyError):
             user.objects.using("not_existed").save()
+
+
+class TestRead:
+    def test_get_all(self, user_model):
+        user = user_model(
+            name="John Doe", is_active=True, created_at=datetime.date.today()
+        )
+
+        user.objects.using(DB).save()
+
+        users = user_model().objects.using(DB).all()
+
+        assert len(users)
