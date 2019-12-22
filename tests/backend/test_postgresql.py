@@ -57,3 +57,25 @@ class TestRead:
         users = user_model().objects.using(DB).all()
 
         assert len(users)
+
+    def test_get_first(self, user_model):
+        user = user_model(
+            name="John Doe", is_active=True, created_at=datetime.date.today()
+        )
+
+        user.objects.using(DB).save()
+
+        user = user_model().objects.using(DB).first()
+
+        assert user.id
+
+    def test_get_last(self, user_model):
+        user = user_model(
+            name="John Doe", is_active=True, created_at=datetime.date.today()
+        )
+
+        user.objects.using(DB).save()
+
+        user = user_model().objects.using(DB).last()
+
+        assert user.id

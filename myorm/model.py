@@ -57,9 +57,20 @@ class BaseModel:
         return fields
 
     def save(self):
-        """Save instance into database."""
+        """Save instance."""
         if self.id is None:
             self.objects.create(self)
 
     def all(self):
+        """Return all objects."""
         return self.objects.all()
+
+    def first(self):
+        """Return first object."""
+        objects = self.all()
+        return objects[0] if objects else None
+
+    def last(self):
+        """Return last object."""
+        objects = self.all()
+        return objects[-1] if objects else None
