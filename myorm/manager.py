@@ -1,7 +1,6 @@
 """myorm manager module."""
 from myorm.backend import OPS_MAP
 from myorm.db import DATABASES
-from myorm.fields import BaseField
 
 
 class Manager:
@@ -24,20 +23,41 @@ class Manager:
     def create(self, instance):
         """Insert instance into database."""
         op_type = "create"
-        columns, values = [], []
-
-        for name in dir(instance):
-            if isinstance(getattr(instance, name), BaseField) and name != "id":
-                field = getattr(instance, name)
-                values.append(field.value)
-                columns.append(name)
+        fields = self.model.get_fields(exclude=["id"])
 
         insert_query = self.ops.get_query(
-            op_type, table=instance.table, columns=columns
+            op_type, table=instance.table, columns=fields["columns"]
         )
 
-        object_id = self.ops.execute(op_type, query=insert_query, values=values)
+        object_id = self.ops.execute(
+            op_type, query=insert_query, values=fields["values"]
+        )
 
-        instance.pk = object_id
+        instance.id = object_id
 
         return instance
+
+    def query_set(self, cols, rows):
+        query_set = []
+        model = type(self.model)
+
+        for row in rows:
+            params = {field_name: value for field_name, value in zip(cols, row)}
+            instance = model(**params)
+            query_set.append(instance)
+
+        return query_set
+
+    def all(self):
+        """Return all rows."""
+        op_type = "read"
+
+        fields = self.model.get_fields()
+
+        select_query = self.ops.get_query(
+            op_type, table=self.model.table, columns=fields["columns"]
+        )
+
+        rows = self.ops.execute(op_type, query=select_query)
+
+        return self.query_set(fields["columns"], rows)

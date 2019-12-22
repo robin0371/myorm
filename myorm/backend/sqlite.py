@@ -6,6 +6,7 @@ import sqlite3
 from myorm.backend.base import (
     Operations as BaseOperations,
     BaseCreateOperations,
+    BaseReadOperations,
 )
 
 
@@ -31,11 +32,11 @@ class Operations(BaseOperations):
     """Object with set of operations for MySQL database."""
 
     def __init__(self, params):
-        super(Operations, self).__init__(params)
-        self.create = CreateOperation(self.connection)
+        self.connection = make_connection(params)
 
-    def make_connection(self):
-        self.connection = make_connection(self.params)
+        # Operations
+        self.create = CreateOperation(self.connection)
+        self.read = ReadOperation(self.connection)
 
 
 class CreateOperation(BaseCreateOperations):
@@ -46,12 +47,11 @@ class CreateOperation(BaseCreateOperations):
 
     def execute(self, *, query=None, values=None):
         try:
-            cursor = self.connection.cursor()
-            cursor.execute(query, values)
+            with self.connection:
+                cursor = self.connection.cursor()
+                cursor.execute(query, values)
 
-            self.connection.commit()
-
-            obj_id = cursor.lastrowid
+                obj_id = cursor.lastrowid
         except sqlite3.DatabaseError as error:
             LOGGER.error(error)
         else:
@@ -61,3 +61,25 @@ class CreateOperation(BaseCreateOperations):
         query = self.insert()
         s = ("?, " * len(columns))[:-2]
         return f"{query} {table}({', '.join(columns)}) VALUES ({s})"
+
+
+class ReadOperation(BaseReadOperations):
+    """Read operation for SQLite database."""
+
+    def __init__(self, conn):
+        self.connection = conn
+
+    def execute(self, *, query=None):
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(query)
+
+            rows = cursor.fetchall()
+        except sqlite3.DatabaseError as error:
+            LOGGER.error(error)
+        else:
+            return rows
+
+    def get_query(self, *, table=None, columns=None):
+        query = self.select()
+        return f"{query} {', '.join(columns)} FROM {table}"
