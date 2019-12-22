@@ -6,6 +6,7 @@ import pymysql
 from myorm.backend.base import (
     Operations as BaseOperations,
     BaseCreateOperations,
+    BaseReadOperations,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ class Operations(BaseOperations):
 
         # Operations
         self.create = CreateOperation(self.connection)
+        self.read = ReadOperation(self.connection)
 
 
 class CreateOperation(BaseCreateOperations):
@@ -50,3 +52,26 @@ class CreateOperation(BaseCreateOperations):
         query = self.insert()
         s = ("%s, " * len(columns))[:-2]
         return f"{query} {table} ({', '.join(columns)}) VALUES ({s})"
+
+
+class ReadOperation(BaseReadOperations):
+    """Read operation for MySQL database."""
+
+    def __init__(self, conn):
+        self.connection = conn
+
+    def execute(self, *, query=None):
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+
+            self.connection.commit()
+        except pymysql.DatabaseError as error:
+            LOGGER.error(error)
+        else:
+            return rows
+
+    def get_query(self, *, table=None, columns=None):
+        query = self.select()
+        return f"{query} {', '.join(columns)} FROM {table}"
