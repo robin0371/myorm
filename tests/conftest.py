@@ -1,9 +1,10 @@
 import os
 
 import pytest
-
+from psycopg2 import sql
 
 from myorm import Model, BooleanField, CharField, DateTimeField, IntegerField
+from myorm.backend.postgresql import make_connection
 from myorm.util import get_project_root
 
 
@@ -14,9 +15,17 @@ class User(Model):
     created_at = DateTimeField()
 
 
-@pytest.fixture(scope="session")
-def user_model():
-    return User
+@pytest.fixture(scope="function")
+def postgres_session(postgres_db_params):
+    with make_connection(postgres_db_params) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(sql.SQL("TRUNCATE users RESTART IDENTITY;"))
+            connection.commit()
+            cursor.close()
+
+            if connection.closed != 0:
+                connection.close()
+    yield
 
 
 @pytest.fixture(scope="session")

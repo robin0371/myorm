@@ -5,7 +5,7 @@ class BaseField:
     """Base field."""
 
     def __init__(self):
-        self._value = None
+        self.value = None
 
     @property
     def value(self):
