@@ -44,7 +44,13 @@ class Manager:
         model = type(self.model)
 
         for row in rows:
-            params = {field_name: value for field_name, value in zip(cols, row)}
+            params = {}
+            for field_name, value in zip(cols, row):
+                field = getattr(model, field_name)
+                if hasattr(field, "to_python"):
+                    value = type(field)(value).to_python()
+                params[field_name] = value
+
             instance = model(**params)
             query_set.append(instance)
 

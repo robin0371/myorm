@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.5'
 
 services:
   postgres:
@@ -17,9 +17,8 @@ services:
       - ./db/postgres:/var/lib/postgresql/data
 
   mysql:
-    image: mysql:5.7
+    image: mysql:8.0
     restart: always
-    command: --init-file /data/application/init.sql
     environment:
       MYSQL_DATABASE: myorm_db
       MYSQL_USER: myorm_user
@@ -30,5 +29,5 @@ services:
     expose:
       - '3306'
     volumes:
-      - ./scripts/mysql.sql:/data/application/init.sql
+      - ./scripts/mysql.sql:/docker-entrypoint-initdb.d/db.sql
       - ./db/mysql:/var/lib/mysql
