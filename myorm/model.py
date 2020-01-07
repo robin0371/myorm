@@ -69,6 +69,8 @@ class BaseModel:
         """Save object."""
         if self.pk is None:
             self.objects.create(self)
+        else:
+            self.objects.update(self)
 
     def all(self):
         """Return all objects."""

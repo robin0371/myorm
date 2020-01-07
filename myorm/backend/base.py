@@ -14,6 +14,13 @@ class BaseOperation:
         """Execute query."""
 
 
+class OperationStatement:
+    @staticmethod
+    @abc.abstractmethod
+    def statement():
+        """Return operation statement."""
+
+
 class Operations(BaseOperation):
     """Database operations."""
 
@@ -28,28 +35,33 @@ class Operations(BaseOperation):
         return result
 
 
-class BaseCreateOperations(BaseOperation):
+class BaseCreateOperations(BaseOperation, OperationStatement):
     """Base create operations."""
 
     @staticmethod
-    def insert():
-        """Insert query."""
+    def statement():
         return "INSERT INTO"
 
 
-class BaseReadOperations(BaseOperation):
+class BaseReadOperations(BaseOperation, OperationStatement):
     """Base read operations."""
 
     @staticmethod
-    def select():
-        """Select query."""
+    def statement():
         return "SELECT"
 
 
-class BaseDeleteOperations(BaseOperation):
+class BaseUpdateOperations(BaseOperation, OperationStatement):
+    """Base update operations."""
+
+    @staticmethod
+    def statement():
+        return "UPDATE"
+
+
+class BaseDeleteOperations(BaseOperation, OperationStatement):
     """Base delete operations."""
 
     @staticmethod
-    def delete():
-        """Delete query."""
+    def statement():
         return "DELETE"

@@ -64,9 +64,8 @@ class CreateOperation(BaseCreateOperations):
         return obj_id
 
     def get_query(self, *, table=None, columns=None):
-        query = self.insert()
         s = ("?, " * len(columns))[:-2]
-        return f"{query} {table}({', '.join(columns)}) VALUES ({s});"
+        return f"{self.statement()} {table}({', '.join(columns)}) VALUES ({s});"
 
 
 class ReadOperation(BaseReadOperations):
@@ -90,8 +89,7 @@ class ReadOperation(BaseReadOperations):
         return rows
 
     def get_query(self, *, table=None, columns=None):
-        query = self.select()
-        return f"{query} {', '.join(columns)} FROM {table};"
+        return f"{self.statement()} {', '.join(columns)} FROM {table};"
 
 
 class DeleteOperation(BaseDeleteOperations):
@@ -114,5 +112,4 @@ class DeleteOperation(BaseDeleteOperations):
             conn.close()
 
     def get_query(self, *, table=None):
-        query = self.delete()
-        return f"{query} FROM {table} WHERE id = ?;"
+        return f"{self.statement()} FROM {table} WHERE id = ?;"
