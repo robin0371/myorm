@@ -1,4 +1,5 @@
 """myorm sqlite operations module."""
+import copy
 import logging
 import os
 import sqlite3
@@ -7,6 +8,7 @@ from myorm.backend.base import (
     Operations as BaseOperations,
     BaseCreateOperations,
     BaseReadOperations,
+    BaseUpdateOperations,
     BaseDeleteOperations,
 )
 
@@ -38,6 +40,7 @@ class Operations(BaseOperations):
         # Operations
         self.create = CreateOperation(params)
         self.read = ReadOperation(params)
+        self.update = UpdateOperation(params)
         self.delete = DeleteOperation(params)
 
 
@@ -90,6 +93,32 @@ class ReadOperation(BaseReadOperations):
 
     def get_query(self, *, table=None, columns=None):
         return f"{self.statement()} {', '.join(columns)} FROM {table};"
+
+
+class UpdateOperation(BaseUpdateOperations):
+    """Update operation for SQLite database."""
+
+    def __init__(self, params):
+        self.params = params
+
+    def execute(self, *, query=None, values=None, pk=None):
+        conn = make_connection(self.params)
+
+        try:
+            params = copy.copy(values)
+            params.append(pk)
+
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            conn.commit()
+        except sqlite3.DatabaseError as error:
+            LOGGER.error(error)
+        finally:
+            conn.close()
+
+    def get_query(self, *, table=None, columns=None):
+        set_values = ", ".join([f"{col} = ?" for col in columns])
+        return f"{self.statement()} {table} SET {set_values} WHERE id = ?;"
 
 
 class DeleteOperation(BaseDeleteOperations):
