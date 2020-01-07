@@ -7,6 +7,7 @@ from myorm.backend.base import (
     Operations as BaseOperations,
     BaseCreateOperations,
     BaseReadOperations,
+    BaseDeleteOperations,
 )
 
 
@@ -32,54 +33,86 @@ class Operations(BaseOperations):
     """Object with set of operations for MySQL database."""
 
     def __init__(self, params):
-        self.connection = make_connection(params)
+        self.params = params
 
         # Operations
-        self.create = CreateOperation(self.connection)
-        self.read = ReadOperation(self.connection)
+        self.create = CreateOperation(params)
+        self.read = ReadOperation(params)
+        self.delete = DeleteOperation(params)
 
 
 class CreateOperation(BaseCreateOperations):
     """Create operation for MySQL database."""
 
-    def __init__(self, conn):
-        self.connection = conn
+    def __init__(self, params):
+        self.params = params
 
     def execute(self, *, query=None, values=None):
-        try:
-            with self.connection:
-                cursor = self.connection.cursor()
-                cursor.execute(query, values)
+        conn = make_connection(self.params)
 
-                obj_id = cursor.lastrowid
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, values)
+            conn.commit()
+
+            obj_id = cursor.lastrowid
         except sqlite3.DatabaseError as error:
             LOGGER.error(error)
-        else:
-            return obj_id
+        finally:
+            conn.close()
+
+        return obj_id
 
     def get_query(self, *, table=None, columns=None):
         query = self.insert()
         s = ("?, " * len(columns))[:-2]
-        return f"{query} {table}({', '.join(columns)}) VALUES ({s})"
+        return f"{query} {table}({', '.join(columns)}) VALUES ({s});"
 
 
 class ReadOperation(BaseReadOperations):
     """Read operation for SQLite database."""
 
-    def __init__(self, conn):
-        self.connection = conn
+    def __init__(self, params):
+        self.params = params
 
     def execute(self, *, query=None):
-        try:
-            cursor = self.connection.cursor()
-            cursor.execute(query)
+        conn = make_connection(self.params)
 
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query)
             rows = cursor.fetchall()
         except sqlite3.DatabaseError as error:
             LOGGER.error(error)
-        else:
-            return rows
+        finally:
+            conn.close()
+
+        return rows
 
     def get_query(self, *, table=None, columns=None):
         query = self.select()
-        return f"{query} {', '.join(columns)} FROM {table}"
+        return f"{query} {', '.join(columns)} FROM {table};"
+
+
+class DeleteOperation(BaseDeleteOperations):
+    """Delete operation for SQLite database."""
+
+    def __init__(self, params):
+        self.params = params
+
+    def execute(self, *, query=None, pk=None):
+        conn = make_connection(self.params)
+
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, (pk,))
+
+            conn.commit()
+        except sqlite3.DatabaseError as error:
+            LOGGER.error(error)
+        finally:
+            conn.close()
+
+    def get_query(self, *, table=None):
+        query = self.delete()
+        return f"{query} FROM {table} WHERE id = ?;"

@@ -1,11 +1,12 @@
 """myorm fields module."""
+import datetime
 
 
 class BaseField:
     """Base field."""
 
-    def __init__(self):
-        self._value = None
+    def __init__(self, value=None):
+        self.value = value
 
     @property
     def value(self):
@@ -27,6 +28,14 @@ class CharField(BaseField):
 class BooleanField(BaseField):
     """Boolean field."""
 
+    def to_python(self):
+        return bool(self.value)
 
-class DateTimeField(BaseField):
+
+class DateField(BaseField):
     """Date and time field."""
+
+    def to_python(self):
+        if not isinstance(self.value, datetime.date):
+            return datetime.date.fromisoformat(self.value)
+        return self.value

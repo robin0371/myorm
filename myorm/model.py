@@ -10,15 +10,22 @@ class BaseModel:
 
     def __new__(cls, *args, **kwargs):
         model = super(BaseModel, cls).__new__(cls)
+        model.pk = None
+
+        fields = model.get_fields()
+        model.fields_names = fields["columns"]
 
         cls.add_to_class(model, "objects", Manager())
 
         return model
 
     def __init__(self, *args, **kwargs):
+        fields = self.get_fields()
         for name, value in kwargs.items():
-            field = getattr(self, name)
-            field.value = value
+            if name in fields["columns"]:
+                field = getattr(self, name)
+                field.value = value
+                setattr(self, name, value)
 
     def add_to_class(self, name, obj):
         setattr(self, name, obj)
@@ -32,7 +39,9 @@ class BaseModel:
     @property
     def pk(self):
         id_field = getattr(self, "id")
-        return id_field.value
+        if isinstance(id_field, BaseField):
+            return id_field.value
+        return id_field
 
     @pk.setter
     def pk(self, object_id):
@@ -57,7 +66,7 @@ class BaseModel:
         return fields
 
     def save(self):
-        """Save instance."""
+        """Save object."""
         if self.pk is None:
             self.objects.create(self)
 
@@ -74,3 +83,7 @@ class BaseModel:
         """Return last object."""
         objects = self.all()
         return objects[-1] if objects else None
+
+    def delete(self):
+        """Delete object."""
+        self.objects.delete(self)

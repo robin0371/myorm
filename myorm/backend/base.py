@@ -44,3 +44,12 @@ class BaseReadOperations(BaseOperation):
     def select():
         """Select query."""
         return "SELECT"
+
+
+class BaseDeleteOperations(BaseOperation):
+    """Base delete operations."""
+
+    @staticmethod
+    def delete():
+        """Delete query."""
+        return "DELETE"

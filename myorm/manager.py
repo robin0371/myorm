@@ -1,4 +1,5 @@
 """myorm manager module."""
+from myorm.fields import IntegerField
 from myorm.backend import OPS_MAP
 from myorm.db import DATABASES
 
@@ -23,17 +24,18 @@ class Manager:
     def create(self, instance):
         """Insert instance into database."""
         op_type = "create"
-        fields = self.model.get_fields(exclude=["id"])
+        columns = [name for name in instance.fields_names if name != "id"]
+        values = [getattr(instance, name) for name in columns]
 
         insert_query = self.ops.get_query(
-            op_type, table=instance.table, columns=fields["columns"]
+            op_type, table=instance.table, columns=columns
         )
 
-        object_id = self.ops.execute(
-            op_type, query=insert_query, values=fields["values"]
-        )
+        object_id = self.ops.execute(op_type, query=insert_query, values=values)
 
-        instance.id = object_id
+        id_field = IntegerField()
+        id_field.value = object_id
+        instance.id = id_field
 
         return instance
 
@@ -42,7 +44,13 @@ class Manager:
         model = type(self.model)
 
         for row in rows:
-            params = {field_name: value for field_name, value in zip(cols, row)}
+            params = {}
+            for field_name, value in zip(cols, row):
+                field = getattr(model, field_name)
+                if hasattr(field, "to_python"):
+                    value = type(field)(value).to_python()
+                params[field_name] = value
+
             instance = model(**params)
             query_set.append(instance)
 
@@ -61,3 +69,13 @@ class Manager:
         rows = self.ops.execute(op_type, query=select_query)
 
         return self.query_set(fields["columns"], rows)
+
+    def delete(self, instance):
+        """Delete object."""
+        op_type = "delete"
+
+        delete_query = self.ops.get_query(op_type, table=self.model.table)
+
+        self.ops.execute(op_type, query=delete_query, pk=instance.pk)
+
+        instance.pk = None
