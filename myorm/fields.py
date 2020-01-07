@@ -1,4 +1,5 @@
 """myorm fields module."""
+import datetime
 
 
 class BaseField:
@@ -31,5 +32,10 @@ class BooleanField(BaseField):
         return bool(self.value)
 
 
-class DateTimeField(BaseField):
+class DateField(BaseField):
     """Date and time field."""
+
+    def to_python(self):
+        if not isinstance(self.value, datetime.date):
+            return datetime.date.fromisoformat(self.value)
+        return self.value

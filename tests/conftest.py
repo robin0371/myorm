@@ -3,9 +3,10 @@ import os
 import pytest
 from psycopg2 import sql
 
-from myorm import Model, BooleanField, CharField, DateTimeField, IntegerField
+from myorm import Model, BooleanField, CharField, DateField, IntegerField
 from myorm.backend.postgresql import make_connection as postgres_make_connection
 from myorm.backend.mysql import make_connection as mysql_make_connection
+from myorm.backend.sqlite import make_connection as sqlite_make_connection
 from myorm.util import get_project_root
 
 
@@ -13,7 +14,7 @@ class User(Model):
     id = IntegerField()
     name = CharField()
     is_active = BooleanField()
-    created_at = DateTimeField()
+    created_at = DateField()
 
 
 @pytest.fixture(scope="function")
@@ -36,6 +37,17 @@ def mysql_session(mysql_db_params):
         cursor.execute("TRUNCATE users;")
         connection.commit()
         cursor.close()
+    connection.close()
+    yield
+
+
+@pytest.fixture(scope="function")
+def sqlite_session(sqlite_db_params):
+    connection = sqlite_make_connection(sqlite_db_params)
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM users;")
+    connection.commit()
+    cursor.close()
     connection.close()
     yield
 

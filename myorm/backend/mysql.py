@@ -86,6 +86,8 @@ class ReadOperation(BaseReadOperations):
 
 
 class DeleteOperation(BaseDeleteOperations):
+    """Delete operation for MySQL database."""
+
     def __init__(self, params):
         self.params = params
 
