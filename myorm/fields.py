@@ -28,12 +28,12 @@ class CharField(BaseField):
 class BooleanField(BaseField):
     """Boolean field."""
 
-    def to_python(self):
+    def to_python(self) -> bool:
         return bool(self.value)
 
 
 class DateField(BaseField):
-    """Date and time field."""
+    """Date field."""
 
     def to_python(self):
         if not isinstance(self.value, datetime.date):

@@ -1,12 +1,18 @@
 """myorm base operations module."""
 import abc
+import logging
+
+LOGGER = logging.getLogger(__name__)
 
 
 class BaseOperation:
     """Base operation."""
 
+    def __init__(self, params: dict):
+        self.params = params
+
     @abc.abstractmethod
-    def get_query(self, **kwargs):
+    def get_query(self, **kwargs) -> str:
         """Return SQL query."""
 
     @abc.abstractmethod
@@ -17,7 +23,7 @@ class BaseOperation:
 class OperationStatement:
     @staticmethod
     @abc.abstractmethod
-    def statement():
+    def statement() -> str:
         """Return operation statement."""
 
 
@@ -26,7 +32,9 @@ class Operations(BaseOperation):
 
     def get_query(self, op_type, **kwargs):
         operation = getattr(self, op_type)
+        LOGGER.debug("op_type = %s, operation = %s", op_type, repr(operation))
         query = operation.get_query(**kwargs)
+        LOGGER.debug("query = %s", query)
         return query
 
     def execute(self, op_type, **kwargs):

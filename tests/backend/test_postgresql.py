@@ -28,7 +28,7 @@ class TestMakeConnection:
 
 
 class TestCreate:
-    def test_ok(self, postgres_session):
+    def test_ok(self, postgres_clean):
         user = User(name="John Doe", is_active=True, created_at=datetime.date.today())
 
         user.objects.using(DB).save()
@@ -38,7 +38,7 @@ class TestCreate:
         assert user.is_active is True
         assert user.created_at == datetime.date.today()
 
-    def test_no_active(self, postgres_session):
+    def test_no_active(self, postgres_clean):
         user = User(name="John Doe", is_active=False, created_at=datetime.date.today())
 
         user.objects.using(DB).save()
@@ -48,7 +48,7 @@ class TestCreate:
         assert user.is_active is False
         assert user.created_at == datetime.date.today()
 
-    def test_incorrect_db(self, postgres_session):
+    def test_incorrect_db(self, postgres_clean):
         user = User(name="John Doe", is_active=True, created_at=datetime.date.today())
 
         with pytest.raises(KeyError):
@@ -56,7 +56,7 @@ class TestCreate:
 
 
 class TestRead:
-    def test_get_all(self, postgres_session):
+    def test_get_all(self, postgres_clean):
         user = User(name="J Doe", is_active=True, created_at=datetime.date.today())
         user.objects.using(DB).save()
         assert user.pk == 1
@@ -72,7 +72,7 @@ class TestRead:
         assert first_user.is_active is True
         assert first_user.created_at == datetime.date.today()
 
-    def test_get_first(self, postgres_session):
+    def test_get_first(self, postgres_clean):
         user = User(name="M Doe", is_active=True, created_at=datetime.date.today())
         user.objects.using(DB).save()
         assert user.pk == 1
@@ -84,7 +84,7 @@ class TestRead:
         assert first_user.is_active is True
         assert first_user.created_at == datetime.date.today()
 
-    def test_get_last(self, postgres_session):
+    def test_get_last(self, postgres_clean):
         user = User(name="B Doe", is_active=True, created_at=datetime.date.today())
         user.objects.using(DB).save()
         assert user.pk == 1
@@ -98,7 +98,7 @@ class TestRead:
 
 
 class TestDelete:
-    def test_ok(self, postgres_session):
+    def test_ok(self, postgres_clean):
         user = User(name="G Doe", is_active=True, created_at=datetime.date.today())
         user.objects.using(DB).save()
 
@@ -115,7 +115,7 @@ class TestDelete:
 
 
 class TestUpdate:
-    def test_ok(self, postgres_session):
+    def test_ok(self, postgres_clean):
         user = User(name="G Doe", is_active=True, created_at=datetime.date.today())
         user.objects.using(DB).save()
 

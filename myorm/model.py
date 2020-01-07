@@ -27,12 +27,12 @@ class BaseModel:
                 field.value = value
                 setattr(self, name, value)
 
-    def add_to_class(self, name, obj):
+    def add_to_class(self, name, obj) -> None:
         setattr(self, name, obj)
         obj.set_model(self)
 
     @property
-    def table(self):
+    def table(self) -> str:
         """Return table name."""
         return pluralize(self.__class__.__name__).lower()
 
@@ -48,16 +48,11 @@ class BaseModel:
         id_field = getattr(self, "id")
         id_field.value = object_id
 
-    def get_fields(self, exclude=None) -> dict:
+    def get_fields(self) -> dict:
         """Return model fields."""
-        fields = {"values": [], "columns": []}
-        if exclude is None:
-            exclude = []
+        fields: dict = {"values": [], "columns": []}
 
         for name in dir(self):
-            if name in exclude:
-                continue
-
             if isinstance(getattr(self, name), BaseField):
                 field = getattr(self, name)
                 fields["values"].append(field.value)

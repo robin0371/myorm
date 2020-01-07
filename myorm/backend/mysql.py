@@ -26,7 +26,7 @@ class Operations(BaseOperations):
     """Object with set of operations for MySQL database."""
 
     def __init__(self, params):
-        self.params = params
+        super(Operations, self).__init__(params)
 
         # Operations
         self.create = CreateOperation(params)
@@ -37,9 +37,6 @@ class Operations(BaseOperations):
 
 class CreateOperation(BaseCreateOperations):
     """Create operation for MySQL database."""
-
-    def __init__(self, params):
-        self.params = params
 
     def execute(self, *, query=None, values=None):
         conn = make_connection(self.params)
@@ -65,9 +62,6 @@ class CreateOperation(BaseCreateOperations):
 class ReadOperation(BaseReadOperations):
     """Read operation for MySQL database."""
 
-    def __init__(self, params):
-        self.params = params
-
     def execute(self, *, query=None):
         conn = make_connection(self.params)
 
@@ -88,9 +82,6 @@ class ReadOperation(BaseReadOperations):
 
 class UpdateOperation(BaseUpdateOperations):
     """Update operation for MySQL database."""
-
-    def __init__(self, params):
-        self.params = params
 
     def execute(self, *, query=None, values=None, pk=None):
         conn = make_connection(self.params)
@@ -115,9 +106,6 @@ class UpdateOperation(BaseUpdateOperations):
 
 class DeleteOperation(BaseDeleteOperations):
     """Delete operation for MySQL database."""
-
-    def __init__(self, params):
-        self.params = params
 
     def execute(self, *, query=None, pk=None):
         conn = make_connection(self.params)

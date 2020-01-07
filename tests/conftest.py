@@ -1,5 +1,3 @@
-import os
-
 import pytest
 from psycopg2 import sql
 
@@ -7,7 +5,7 @@ from myorm import Model, BooleanField, CharField, DateField, IntegerField
 from myorm.backend.postgresql import make_connection as postgres_make_connection
 from myorm.backend.mysql import make_connection as mysql_make_connection
 from myorm.backend.sqlite import make_connection as sqlite_make_connection
-from myorm.util import get_project_root
+from myorm.db import DATABASES
 
 
 class User(Model):
@@ -18,7 +16,8 @@ class User(Model):
 
 
 @pytest.fixture(scope="function")
-def postgres_session(postgres_db_params):
+def postgres_clean(postgres_db_params):
+    """Clean users table in PostgreSQL database."""
     with postgres_make_connection(postgres_db_params) as connection:
         with connection.cursor() as cursor:
             cursor.execute(sql.SQL("TRUNCATE users RESTART IDENTITY;"))
@@ -31,7 +30,8 @@ def postgres_session(postgres_db_params):
 
 
 @pytest.fixture(scope="function")
-def mysql_session(mysql_db_params):
+def mysql_clean(mysql_db_params):
+    """Clean users table in MySQL database."""
     connection = mysql_make_connection(mysql_db_params)
     with connection.cursor() as cursor:
         cursor.execute("TRUNCATE users;")
@@ -42,7 +42,8 @@ def mysql_session(mysql_db_params):
 
 
 @pytest.fixture(scope="function")
-def sqlite_session(sqlite_db_params):
+def sqlite_clean(sqlite_db_params):
+    """Clean users table in SQLite database."""
     connection = sqlite_make_connection(sqlite_db_params)
     cursor = connection.cursor()
     cursor.execute("DELETE FROM users;")
@@ -54,30 +55,14 @@ def sqlite_session(sqlite_db_params):
 
 @pytest.fixture(scope="session")
 def postgres_db_params():
-    test_db_params = {
-        "host": "localhost",
-        "port": 54320,
-        "user": "myorm_user",
-        "password": "myorm_user",
-        "database": "myorm_db",
-    }
-    return test_db_params
+    return DATABASES["postgres"]
 
 
 @pytest.fixture(scope="session")
 def mysql_db_params():
-    test_db_params = {
-        "host": "localhost",
-        "user": "myorm_user",
-        "password": "myorm_user",
-        "database": "myorm_db",
-    }
-    return test_db_params
+    return DATABASES["mysql"]
 
 
 @pytest.fixture(scope="session")
 def sqlite_db_params():
-    test_db_params = {
-        "db": os.path.join(get_project_root(), "db", "sqlite.db"),
-    }
-    return test_db_params
+    return DATABASES["sqlite"]
