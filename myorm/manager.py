@@ -79,3 +79,16 @@ class Manager:
         self.ops.execute(op_type, query=delete_query, pk=instance.pk)
 
         instance.pk = None
+
+    def update(self, instance):
+        """Update object."""
+        op_type = "update"
+
+        columns = [name for name in instance.fields_names if name != "id"]
+        values = [getattr(instance, name) for name in columns]
+
+        update_query = self.ops.get_query(
+            op_type, table=instance.table, columns=columns
+        )
+
+        self.ops.execute(op_type, query=update_query, values=values, pk=instance.pk)

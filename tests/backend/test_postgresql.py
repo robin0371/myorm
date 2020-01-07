@@ -112,3 +112,33 @@ class TestDelete:
 
         users = User().objects.using(DB).all()
         assert len(users) == 0
+
+
+class TestUpdate:
+    def test_ok(self, postgres_session):
+        user = User(name="G Doe", is_active=True, created_at=datetime.date.today())
+        user.objects.using(DB).save()
+
+        assert user.pk == 1
+        assert user.name == "G Doe"
+        assert user.is_active is True
+        assert user.created_at == datetime.date.today()
+
+        # update user
+        user.name = "John D"
+        user.is_active = False
+        user.save()
+
+        # check object
+        assert user.pk == 1
+        assert user.name == "John D"
+        assert user.is_active is False
+        assert user.created_at == datetime.date.today()
+
+        # check database
+        first_user = User().objects.using(DB).first()
+
+        assert first_user.pk == 1
+        assert first_user.name == "John D"
+        assert first_user.is_active is False
+        assert first_user.created_at == datetime.date.today()

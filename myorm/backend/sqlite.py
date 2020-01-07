@@ -1,4 +1,5 @@
 """myorm sqlite operations module."""
+import copy
 import logging
 import os
 import sqlite3
@@ -7,6 +8,7 @@ from myorm.backend.base import (
     Operations as BaseOperations,
     BaseCreateOperations,
     BaseReadOperations,
+    BaseUpdateOperations,
     BaseDeleteOperations,
 )
 
@@ -38,6 +40,7 @@ class Operations(BaseOperations):
         # Operations
         self.create = CreateOperation(params)
         self.read = ReadOperation(params)
+        self.update = UpdateOperation(params)
         self.delete = DeleteOperation(params)
 
 
@@ -64,9 +67,8 @@ class CreateOperation(BaseCreateOperations):
         return obj_id
 
     def get_query(self, *, table=None, columns=None):
-        query = self.insert()
         s = ("?, " * len(columns))[:-2]
-        return f"{query} {table}({', '.join(columns)}) VALUES ({s});"
+        return f"{self.statement()} {table}({', '.join(columns)}) VALUES ({s});"
 
 
 class ReadOperation(BaseReadOperations):
@@ -90,8 +92,33 @@ class ReadOperation(BaseReadOperations):
         return rows
 
     def get_query(self, *, table=None, columns=None):
-        query = self.select()
-        return f"{query} {', '.join(columns)} FROM {table};"
+        return f"{self.statement()} {', '.join(columns)} FROM {table};"
+
+
+class UpdateOperation(BaseUpdateOperations):
+    """Update operation for SQLite database."""
+
+    def __init__(self, params):
+        self.params = params
+
+    def execute(self, *, query=None, values=None, pk=None):
+        conn = make_connection(self.params)
+
+        try:
+            params = copy.copy(values)
+            params.append(pk)
+
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            conn.commit()
+        except sqlite3.DatabaseError as error:
+            LOGGER.error(error)
+        finally:
+            conn.close()
+
+    def get_query(self, *, table=None, columns=None):
+        set_values = ", ".join([f"{col} = ?" for col in columns])
+        return f"{self.statement()} {table} SET {set_values} WHERE id = ?;"
 
 
 class DeleteOperation(BaseDeleteOperations):
@@ -114,5 +141,4 @@ class DeleteOperation(BaseDeleteOperations):
             conn.close()
 
     def get_query(self, *, table=None):
-        query = self.delete()
-        return f"{query} FROM {table} WHERE id = ?;"
+        return f"{self.statement()} FROM {table} WHERE id = ?;"
